@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtraction Practice (Without Regrouping)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: auto repeat(4, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+            border: 2px solid #333;
+            padding: 10px;
+        }
+        .grid div {
+            text-align: center;
+            padding: 5px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+        }
+        .place-value {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+        .number {
+            font-size: 24px;
+        }
+        .subtraction-line {
+            grid-column: 1 / -1;
+            border-bottom: 2px solid #333;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 50px;
+            font-size: 24px;
+            text-align: center;
+        }
+        button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #result {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .hint {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .button-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Subtraction Practice (Without Regrouping)</h1>
+        <div id="problem-container"></div>
+        <div class="button-container">
+            <button onclick="checkAnswers()">Check Answers</button>
+            <button onclick="generateProblems()">New Problems</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const problems = [];
+
+        function generateProblem() {
+            let num1, num2;
+            do {
+                num1 = Math.floor(Math.random() * 9000) + 1000;
+                num2 = Math.floor(Math.random() * (num1 - 1000)) + 1000;
+            } while (!canSubtractWithoutRegrouping(num1, num2));
+            return { num1, num2, difference: num1 - num2 };
+        }
+
+        function canSubtractWithoutRegrouping(num1, num2) {
+            const digits1 = num1.toString().padStart(4, '0').split('').map(Number);
+            const digits2 = num2.toString().padStart(4, '0').split('').map(Number);
+            return digits1.every((digit, index) => digit >= digits2[index]);
+        }
+
+        function formatNumber(num) {
+            return num.toString().padStart(4, '0').split('');
+        }
+
+        function createProblemHTML(problem, index) {
+            const { num1, num2 } = problem;
+            const formattedNum1 = formatNumber(num1);
+            const formattedNum2 = formatNumber(num2);
+            return `
+                <div class="grid" id="problem-${index}">
+                    <div></div>
+                    <div class="place-value">Th</div>
+                    <div class="place-value">H</div>
+                    <div class="place-value">T</div>
+                    <div class="place-value">O</div>
+                    <div></div>
+                    <div class="number">${formattedNum1[0]}</div>
+                    <div class="number">${formattedNum1[1]}</div>
+                    <div class="number">${formattedNum1[2]}</div>
+                    <div class="number">${formattedNum1[3]}</div>
+                    <div>-</div>
+                    <div class="number">${formattedNum2[0]}</div>
+                    <div class="number">${formattedNum2[1]}</div>
+                    <div class="number">${formattedNum2[2]}</div>
+                    <div class="number">${formattedNum2[3]}</div>
+                    <div class="subtraction-line"></div>
+                    <div></div>
+                    <div><input type="number" id="answer-${index}-0" min="0" max="9"></div>
+                    <div><input type="number" id="answer-${index}-1" min="0" max="9"></div>
+                    <div><input type="number" id="answer-${index}-2" min="0" max="9"></div>
+                    <div><input type="number" id="answer-${index}-3" min="0" max="9"></div>
+                </div>
+                <div class="hint" id="hint-${index}"></div>
+            `;
+        }
+
+        function generateProblems() {
+            const container = document.getElementById('problem-container');
+            problems.length = 0;
+            
+            for (let i = 0; i < 5; i++) {
+                const problem = generateProblem();
+                problems.push(problem);
+            }
+            
+            container.innerHTML = '';
+            problems.forEach((problem, index) => {
+                container.innerHTML += createProblemHTML(problem, index);
+            });
+
+            document.getElementById('result').textContent = '';
+        }
+
+        function checkAnswers() {
+            let correct = 0;
+            for (let i = 0; i < problems.length; i++) {
+                const userAnswer = parseInt(
+                    (document.getElementById(`answer-${i}-0`).value || '0') +
+                    (document.getElementById(`answer-${i}-1`).value || '0') +
+                    (document.getElementById(`answer-${i}-2`).value || '0') +
+                    (document.getElementById(`answer-${i}-3`).value || '0')
+                );
+                const { num1, num2, difference: correctAnswer } = problems[i];
+                const hintElement = document.getElementById(`hint-${i}`);
+
+                if (userAnswer === correctAnswer) {
+                    correct++;
+                    hintElement.textContent = '';
+                    document.getElementById(`problem-${i}`).style.backgroundColor = '#e6ffe6';
+                } else {
+                    document.getElementById(`problem-${i}`).style.backgroundColor = '#ffe6e6';
+                    const hint = generateHint(num1, num2, userAnswer, correctAnswer);
+                    hintElement.textContent = hint;
+                }
+            }
+            document.getElementById('result').textContent = `You got ${correct} out of ${problems.length} correct! Check the hints for incorrect answers and try again.`;
+        }
+
+        function generateHint(num1, num2, userAnswer, correctAnswer) {
+            let hint = '';
+            const correctDigits = correctAnswer.toString().padStart(4, '0').split('').map(Number);
+            const userDigits = userAnswer.toString().padStart(4, '0').split('').map(Number);
+            const num1Digits = num1.toString().padStart(4, '0').split('').map(Number);
+            const num2Digits = num2.toString().padStart(4, '0').split('').map(Number);
+
+            for (let i = 3; i >= 0; i--) {
+                if (correctDigits[i] !== userDigits[i]) {
+                    const placeValue = ['thousands', 'hundreds', 'tens', 'ones'][i];
+                    
+                    hint += `Check your ${placeValue} place. `;
+                    
+                    if (userDigits[i] > correctDigits[i]) {
+                        hint += `Your answer in the ${placeValue} place is too high. `;
+                    } else {
+                        hint += `Your answer in the ${placeValue} place is too low. `;
+                    }
+
+                    hint += `${num1Digits[i]} - ${num2Digits[i]} = ${correctDigits[i]}. `;
+                }
+            }
+
+            if (hint === '') {
+                hint = "Your answer is correct! Well done!";
+            }
+
+            return hint;
+        }
+
+        generateProblems();
+    </script>
+</body>
+</html>
